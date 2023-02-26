@@ -1,0 +1,101 @@
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+		<style>
+
+            #menu{
+				display: none;
+                font-family: 'Roboto', sans-serif;
+                min-height: 350px;
+                background: rgba(0, 0, 0, 0.733);
+                color: white;
+                min-width: 200px;
+                position: absolute;
+                top: 45%;
+                left: 15px;
+                transform: translate(0px, -50%);
+			}
+			p{
+				padding-left: 15px;
+			}
+			.selected{
+				color: cornflowerblue;
+			}
+
+        </style>
+
+		<script>
+			$(function(){
+				window.addEventListener('message', function(event) {
+					if(event.data == "openmenu"){
+						$("#menu").css('display', "block");
+						selected = 1;
+						MoveUp();
+					}else if(event.data == "closemenu"){
+						$("#menu").css('display', "none");
+					}else if(event.data == "moveup"){
+						MoveUp()
+					}else if (event.data == "movedown"){
+						MoveDown()
+					}else if(event.data == "execute"){
+						$.post("http://vehiclecontrol/nuiexecute", JSON.stringify({data: $(".selected").attr('id')}));
+					}
+				});
+			});
+
+			function MoveUp(){
+				if(selected - 1 >= 0){
+					selected = selected - 1;
+				}else{
+					selected = $("p").length - 1;
+				}
+				if($("p:nth-child("+(selected + 1)+")").hasClass("locdwadked")){
+					MoveUp();
+				}else{
+					$(".selected").removeClass("selected");
+					$("p:nth-child("+(selected + 1)+")").addClass("selected");
+				}
+			}
+			function MoveDown(){
+				if(selected + 1 < $("p").length){
+					selected = selected + 1;
+				}else{
+					selected = 0;
+				}
+				if($("p:nth-child("+(selected + 1)+")").hasClass("DSF")){
+					MoveDown();
+				}else{
+					$(".selected").removeClass("selected");
+					$("p:nth-child("+(selected + 1)+")").addClass("selected");
+				}
+			}
+			window.addEventListener('message', (event) => {
+				if (event.data.type == "enableKeyFob") {
+					$("#fob").show();
+				} else if (event.data.type == "playSound") {
+				const audioPlayer = new Audio(`./sounds/${event.data.file}.ogg`);
+				audioPlayer.volume = event.data.volume;
+				audioPlayer.play();
+				}
+			});
+		</script>
+	</head>
+	<body>
+		<div style="box-shadow: 5px 7px rgba(42, 0, 194, 0.795); border-radius: 10px;" id="menu">
+			<h3 style="color: rgba(35, 35, 233, 0.76); text-align:center; border-bottom: 2px solid white; padding-bottom: 10px;">Vehicle Control</h3>
+			<div>
+				<p style="border-bottom: 1px solid white; padding-bottom: 8px;" id="engine" >Toggle Engine</p>
+				<p id="window1">Roll Driver Window</p>
+				<p id="window2">Roll Passenger Window</p>
+				<p id="window3">Roll Rear Left Window</p>
+				<p id="window4" style="border-bottom: 1px solid white; padding-bottom: 8px;">Roll Rear Rigth Window</p>
+				<p id="lockcar" class="locked">Lock/Unlock Doors</p>
+				<p id="trunk">Open/Close Trunk</p>
+				<p id="hood" style="border-bottom: 1px solid white; padding-bottom: 8px;">Open/Close Hood</p>
+				<p id="alarmon">Start Alarm</p>
+				<p id="alarmoff">Stop Alarm</p>
+			</div>
+        </div>
+	</body>
+</html>
